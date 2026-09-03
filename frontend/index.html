@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CCP Tutor — Agente de estudo AWS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy-950: #0b1420;
+    --navy-900: #101d2e;
+    --navy-800: #16283d;
+    --navy-700: #223a54;
+    --paper: #eef1f4;
+    --paper-dim: #b7c2ce;
+    --amber: #e8a33d;
+    --amber-dim: #7a5c2c;
+    --good: #6fb98f;
+    --bad: #d97575;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--navy-950);
+    color: var(--paper);
+    font-family: 'Inter', sans-serif;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    height: 100vh;
+  }
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar {
+    background: var(--navy-900);
+    border-right: 1px solid var(--navy-700);
+    padding: 28px 22px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand {
+    font-family: 'Source Serif 4', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--paper);
+    margin: 0 0 2px 0;
+  }
+
+  .brand-sub {
+    font-size: 13px;
+    color: var(--paper-dim);
+    margin: 0 0 32px 0;
+  }
+
+  .domain-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .domain-item {
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    color: var(--paper-dim);
+    border-left: 2px solid transparent;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+
+  .domain-item:hover {
+    background: var(--navy-800);
+    color: var(--paper);
+  }
+
+  .domain-weight {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--amber);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding-top: 20px;
+    border-top: 1px solid var(--navy-700);
+    font-size: 12px;
+    color: var(--paper-dim);
+    line-height: 1.5;
+  }
+
+  .sidebar-footer code {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--amber);
+  }
+
+  /* ---------- MAIN ---------- */
+  .main {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
+
+  .topbar {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--navy-700);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .topbar h1 {
+    font-family: 'Source Serif 4', serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+  }
+
+  .topbar button {
+    background: transparent;
+    border: 1px solid var(--navy-700);
+    color: var(--paper-dim);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  .topbar button:hover { border-color: var(--amber); color: var(--amber); }
+
+  .chat-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .msg {
+    max-width: 640px;
+    line-height: 1.6;
+    font-size: 15px;
+    white-space: pre-wrap;
+  }
+
+  .msg.user {
+    align-self: flex-end;
+    background: var(--navy-700);
+    padding: 12px 16px;
+    border-radius: 10px 10px 2px 10px;
+  }
+
+  .msg.agent {
+    align-self: flex-start;
+    padding: 4px 0;
+  }
+
+  .msg.agent .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--amber);
+    display: block;
+    margin-bottom: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .empty-state {
+    margin: auto;
+    text-align: center;
+    color: var(--paper-dim);
+    max-width: 420px;
+  }
+
+  .empty-state h2 {
+    font-family: 'Source Serif 4', serif;
+    color: var(--paper);
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  .composer {
+    padding: 20px 28px 26px 28px;
+    border-top: 1px solid var(--navy-700);
+    display: flex;
+    gap: 10px;
+  }
+
+  .composer input {
+    flex: 1;
+    background: var(--navy-800);
+    border: 1px solid var(--navy-700);
+    color: var(--paper);
+    padding: 13px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+  }
+  .composer input:focus { outline: none; border-color: var(--amber); }
+
+  .composer button {
+    background: var(--amber);
+    color: var(--navy-950);
+    border: none;
+    padding: 0 22px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .composer button:disabled { opacity: 0.5; cursor: default; }
+
+  .typing {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--paper-dim);
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <p class="brand">CCP Tutor</p>
+    <p class="brand-sub">Agente de estudo — AWS Cloud Practitioner</p>
+
+    <div class="domain-list" id="domainList"></div>
+
+    <div class="sidebar-footer">
+      Backend: <code>FastAPI</code> · Modelo: <code>Claude Haiku</code><br/>
+      Toque em um domínio para pedir uma explicação, ou converse livremente no chat.
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <h1>Sessão de estudo</h1>
+      <button id="resetBtn">reiniciar conversa</button>
+    </div>
+
+    <div class="chat-area" id="chatArea">
+      <div class="empty-state" id="emptyState">
+        <h2>Vamos estudar para o CLF-C02?</h2>
+        <p>Escolha um domínio ao lado ou digite algo como "explica o modelo de responsabilidade compartilhada".</p>
+      </div>
+    </div>
+
+    <form class="composer" id="composerForm">
+      <input id="messageInput" type="text" placeholder="Pergunte algo sobre AWS Cloud Practitioner..." autocomplete="off" />
+      <button type="submit" id="sendBtn">Enviar</button>
+    </form>
+  </main>
+</div>
+
+<script>
+  const API_URL = "http://127.0.0.1:8000"; // ajuste se o backend rodar em outra porta
+  const USER_ID = "demo-user";
+
+  const DOMAINS = [
+    { name: "Cloud Concepts", weight: "24%" },
+    { name: "Security and Compliance", weight: "30%" },
+    { name: "Cloud Technology and Services", weight: "34%" },
+    { name: "Billing, Pricing and Support", weight: "12%" },
+  ];
+
+  const domainList = document.getElementById("domainList");
+  DOMAINS.forEach(d => {
+    const el = document.createElement("div");
+    el.className = "domain-item";
+    el.innerHTML = `${d.name}<span class="domain-weight">${d.weight} da prova</span>`;
+    el.addEventListener("click", () => {
+      sendMessage(`Pode me explicar os principais conceitos de ${d.name}?`);
+    });
+    domainList.appendChild(el);
+  });
+
+  const chatArea = document.getElementById("chatArea");
+  const emptyState = document.getElementById("emptyState");
+  const form = document.getElementById("composerForm");
+  const input = document.getElementById("messageInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const resetBtn = document.getElementById("resetBtn");
+
+  function appendMessage(role, text) {
+    if (emptyState) emptyState.remove();
+    const div = document.createElement("div");
+    div.className = `msg ${role}`;
+    if (role === "agent") {
+      div.innerHTML = `<span class="label">agente</span>${escapeHtml(text)}`;
+    } else {
+      div.textContent = text;
+    }
+    chatArea.appendChild(div);
+    chatArea.scrollTop = chatArea.scrollHeight;
+    return div;
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement("div");
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  async function sendMessage(text) {
+    appendMessage("user", text);
+    input.value = "";
+    sendBtn.disabled = true;
+
+    const typingEl = appendMessage("agent", "digitando...");
+
+    try {
+      const res = await fetch(`${API_URL}/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_id: USER_ID, message: text }),
+      });
+      const data = await res.json();
+      typingEl.innerHTML = `<span class="label">agente</span>${escapeHtml(data.reply)}`;
+    } catch (err) {
+      typingEl.innerHTML = `<span class="label">agente</span>Não consegui falar com o backend. Ele está rodando em ${API_URL}?`;
+    } finally {
+      sendBtn.disabled = false;
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+  }
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+    sendMessage(text);
+  });
+
+  resetBtn.addEventListener("click", async () => {
+    await fetch(`${API_URL}/chat/reset?user_id=${USER_ID}`, { method: "POST" });
+    chatArea.innerHTML = "";
+    chatArea.appendChild(emptyState);
+  });
+</script>
+
+</body>
+</html>
