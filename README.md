@@ -85,10 +85,3 @@ docs/
   architecture.md
 ```
 
-## Próximos passos (se fosse evoluir para produção)
-
-- Trocar o retriever por embeddings reais + vector DB (Chroma/FAISS),
-  indexando o Exam Guide oficial da AWS em PDF
-- Persistir o histórico de chat no banco (hoje fica em memória por processo)
-- Autenticação real de usuário em vez de `user_id` livre
-- Rate limiting e cache de respostas para controlar custo de API
